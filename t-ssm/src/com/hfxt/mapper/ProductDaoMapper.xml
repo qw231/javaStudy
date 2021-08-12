@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+		<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+				"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="com.hfxt.dao.ProductDao">
+	<resultMap id="productMap" type="Product">
+		<id property="productid" column="productid"></id>
+		<result property="productname" column="productname"></result>
+		<result property="quantity" column="quantity"></result>
+		<result property="image" column="image"></result>
+		<result property="image2" column="image2"></result>
+	</resultMap>
+
+	<select id="getProducts" resultMap="productMap">
+		select * from product
+	</select>
+	
+	<insert id="addPro" parameterType="Product" useGeneratedKeys="true" keyProperty="pro.productid">
+		
+		insert into product
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="pro.quantity!=null">
+				quantity,
+			</if>
+			<if test="pro.productname!=null and pro.productname!=''">
+				productname,
+			</if>
+			<if test="pro.image!=null and pro.image!=''">
+				image,
+			</if>
+			<if test="pro.image2!=null and pro.image2!=''">
+				image2
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="pro.quantity!=null">
+				#{pro.quantity},
+			</if>
+			<if test="pro.productname!=null and pro.productname!=''">
+				#{pro.productname},
+			</if>
+			<if test="pro.image!=null and pro.image!=''">
+				#{pro.image},
+			</if>
+			<if test="pro.image2!=null and pro.image2!=''">
+				#{pro.image2}
+			</if>
+		</trim>
+	</insert>
+</mapper>

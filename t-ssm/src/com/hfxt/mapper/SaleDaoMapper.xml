@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+		<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+				"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+		
+<mapper namespace="com.hfxt.dao.SaleDao">
+
+	<resultMap id="saleMap" type="Sale">
+		<id property="saleid" column="saleid"></id>
+		<result property="price" column="price"></result>
+		<result property="quantity" column="quantity"></result>
+		<result property="totalprice" column="totalprice"></result>
+		<result property="saledate" column="saledate"></result>
+		<association property="user" javaType="Users">
+			<id property="userid" column="USERID"></id>
+			<result property="username" column="USERNAME"></result>
+			<result property="password" column="password"></result>
+		</association>
+		<association property="product" javaType="Product">
+			<id property="productid" column="productid"></id>
+			<result property="productname" column="productname"></result>
+			<result property="quantity" column="quantity"></result>
+			<result property="image" column="image"></result>
+			<result property="image2" column="image2"></result>
+		</association>
+	</resultMap>
+	
+	<sql id="sql_where">
+		<if test="sale.product!=null and sale.product.productid!=null and sale.product.productid!=-1">
+		and sale.productid=#{sale.product.productid}
+		</if>
+	</sql>
+	
+	<select id="getcount" resultType="int">
+		select count(1) from sale where 1=1
+		<include refid="sql_where"></include>
+	</select>
+
+	<select id="getSales" resultMap="saleMap">
+		select * from sale
+		INNER JOIN users on users.userid=sale.userid
+		INNER JOIN product on product.productid=sale.productid
+		where 1=1
+		<include refid="sql_where"></include>
+		order by ${choice}
+		LIMIT #{pageIndex},#{pageSize}
+	</select>
+
+	<delete id="delSale" parameterType="int">
+		delete from sale where saleid=#{saleid}
+	</delete>
+	
+	<select id="getSale" resultMap="saleMap">
+		select * from sale where saleid=#{saleid}
+	</select>
+	
+	<insert id="addSale" parameterType="Sale" useGeneratedKeys="true" keyProperty="sale.saleid">
+	
+		insert into sale
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="sale.price!=null">
+				price,
+			</if>
+			<if test="sale.quantity!=null">
+				quantity,
+			</if>
+			<if test="sale.totalprice!=null">
+				totalprice,
+			</if>
+			<if test="sale.saledate!=null">
+				saledate,
+			</if>
+			<if test="sale.user!=null and sale.user.userid!=null">
+				userid,
+			</if>
+			<if test="sale.product!=null and sale.product.productid!=null and sale.product.productid!=-1">
+				productid
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="sale.price!=null">
+				#{sale.price},
+			</if>
+			<if test="sale.quantity!=null">
+				#{sale.quantity},
+			</if>
+			<if test="sale.totalprice!=null">
+				#{sale.totalprice},
+			</if>
+			<if test="sale.saledate!=null">
+				#{sale.saledate},
+			</if>
+			<if test="sale.user!=null and sale.user.userid!=null">
+				#{sale.user.userid},
+			</if>
+			<if test="sale.product!=null and sale.product.productid!=null and sale.product.productid!=-1">
+				#{sale.product.productid}
+			</if>
+		</trim>
+	</insert>
+	
+	<update id="updateSale" parameterType="Sale">
+
+		update sale
+		<trim prefix="set" suffixOverrides="," suffix="where saleid=#{sale.saleid}">
+			<if test="sale.price!=null">
+				price=#{sale.price},
+			</if>
+			<if test="sale.quantity!=null">
+				quantity=#{sale.quantity},
+			</if>
+			<if test="sale.totalprice!=null">
+				totalprice=#{sale.totalprice},
+			</if>
+			<if test="sale.saledate!=null">
+				saledate=curdate(),
+			</if>
+			<if test="sale.product!=null and sale.product.productid!=null and sale.product.productid!=-1">
+				productid=#{sale.product.productid}
+			</if>
+		</trim>
+
+	</update>
+	
+	<select id="getSaleProUser" resultMap="saleMap">
+		select * from sale
+		inner join users on users.userid=sale.userid
+		inner join product on product.productid=sale.productid
+		where saleid=#{saleid}
+	</select>
+
+</mapper>

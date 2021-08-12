@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:p="http://www.springframework.org/schema/p"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                http://www.springframework.org/schema/aop
+                http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+                http://www.springframework.org/schema/tx
+                http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+                http://www.springframework.org/schema/context
+                http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc
+                http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+
+	<context:component-scan base-package="com.hfxt.dao,com.hfxt.service"></context:component-scan>
+
+	<!--引用外部资源文件-->
+	<context:property-placeholder location="classpath:database.properties" />
+	
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="username" value="${jdbc.username}"></property>
+		<property name="password" value="${jdbc.password}"></property>
+		<property name="driverClassName" value="${jdbc.driver}"></property>
+		<property name="url" value="${jdbc.url}"></property>
+		<!-- 指定连接数据库连接池的最大连接数 -->
+		<property name="maxActive" value="${jdbc.maxPoolSize}"></property>
+	    <!-- 指定连接数据库连接池的初始化连接数 -->
+	    <property name="initialSize" value="${jdbc.initialPoolSize}"></property>
+	</bean>
+	
+	<!-- <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+		<property name="driverClass" value="${jdbc.driverClassName}"/>
+		<property name="jdbcUrl" value="${jdbc.url}"/>
+		<property name="user" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
+		指定连接数据库连接池的最大连接数
+		 <property name="maxPoolSize" value="${jdbc.maxPoolSize}"></property>
+		 指定连接数据库连接池的最小连接数
+		 <property name="minPoolSize" value="${jdbc.minPoolSize}"></property>
+		  指定连接数据库连接池的初始化连接数
+		  <property name="initialPoolSize" value="${jdbc.initialPoolSize}"></property>
+		  指定连接数据库连接池的连接的最大空闲时间
+		  <property name="maxIdleTime" value="${jdbc.maxIdleTime}"></property>
+	</bean> -->
+
+	<!--创建sqlsessionFactory工厂实例-->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!--引用数据源-->
+		<property name="dataSource" ref="dataSource" />
+		<!--解析Dao映射文件-->
+		<property name="mapperLocations" value="classpath:com/hfxt/mapper/*Mapper.xml"></property>
+		<!--定义别名-->
+		<property name="typeAliasesPackage" value="com.hfxt.entity" />
+	</bean>
+
+
+	<!--mapper映射器  把dao接口自动配置 成Dao实现类-->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.hfxt.dao"></property>
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+
+
+	<!--创建事务管理器 引用数据源-->
+	<bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	<property name="dataSource" ref="dataSource" />
+	</bean>
+	<tx:annotation-driven transaction-manager="txManager" />
+
+	<!-- <tx:advice id="txAdvice" transaction-manager="txManager">
+        定义事务规则
+        <tx:attributes>
+            <tx:method name="get*" propagation="SUPPORTS" />
+            <tx:method name="search*" propagation="SUPPORTS"/>
+            <tx:method name="query*" propagation="SUPPORTS"/>
+            <tx:method name="add*" propagation="REQUIRED"/>
+            <tx:method name="insert*" propagation="REQUIRED"/>
+            <tx:method name="del*" propagation="REQUIRED"/>
+            <tx:method name="update*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+
+    切入事务
+    <aop:config>
+        <aop:pointcut id="point" expression="execution(* com.hfxt.service..*.*(..))" />
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="point" />
+    </aop:config> -->
+</beans>
